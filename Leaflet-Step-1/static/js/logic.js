@@ -1,10 +1,8 @@
-// Create a map object
-var myMap = L.map("map", {
-    center: [15.5994, -28.6731],
-    zoom: 3
+let myMap = L.map("map", {
+    center: [39.50, -98.35],
+    zoom: 5
 });
 
-// Adding tile layer
 L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
     tileSize: 512,
@@ -14,44 +12,56 @@ L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
     accessToken: API_KEY
 }).addTo(myMap);
 
-let earthquakes = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"
+let earthquakeURL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson"
 
-d3.json(earthquakes, function (data) {
-    function mapStyle(feature) {
+d3.json(earthquakeURL, function (data) {
+    function styleInfo(feature) {
         return {
-            opacity: 1,
             fillOpacity: 1,
-            fillColor: color(feature.properties.mag),
-            color: "#0040ff",
-            radius: radius(feature.properties.mag)
-        };
-    }
-
-    function color(magnitude) {
-        switch (true) {
-            case magnitude > 5:
-                return "#0039e6";
-            case magnitude > 4:
-                return "#0033cc";
-            case magnitude > 3:
-                return "#002db3";
-            case magnitude > 2:
-                return "#002699";
-            case magnitude > 1:
-                return "#002080";
-            default:
-                return "#00134d";
+            fillColor: markerColor(feature.properties.mag),
+            color: "black",
+            radius: markerRadius(feature.properties.mag),
+            weight: 0.25
         }
     }
 
-    function radius(magnitude) {
+    function markerColor(magnitude) {
+        switch (true) {
+            case magnitude > 5:
+                return "#330000";
+            case magnitude > 4:
+                return "#333300";
+            case magnitude > 3:
+                return "#336600";
+            case magnitude > 2:
+                return "#339900";
+            case magnitude > 1:
+                return "#33CC00";
+            default:
+                return "#33FF00"
+        }
+    }
+
+    function markerRadius(magnitude) {
         if (magnitude === 0) {
             return 1;
         }
+
         return magnitude * 4;
     }
 
-    L.geoJson(data){
+    L.geoJson(data, {
+        pointToLayer: function (feature, latlng) {
+            return L.circleMarker(latlng);
+        },
 
-    }
+        style: styleInfo,
+
+        onEachFeature: function (feature, layer) {
+            layer.bindPopup("Magnitude: " + feature.properties.mag + "<br>Location: " + feature.properties.place);
+        }
+    }).addTo(myMap)
 });
+
+
+
