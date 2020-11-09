@@ -63,5 +63,25 @@ d3.json(earthquakeURL, function (data) {
     }).addTo(myMap)
 });
 
+function legendColor(d) {
+    return d > 5 ? "#330000" :
+        d > 4 ? "#333300" :
+            d > 3 ? "#336600" :
+                d > 2 ? "#339900" :
+                    d > 1 ? "#33CC00" :
+                        "#33FF00";
+}
 
+legend = L.control({ position: "bottomright" });
+legend.onAdd = function () {
+    let div = L.DomUtil.create("div", "info legend"),
+        mags = [0, 1, 2, 3, 4, 5],
+        labels = [];
+    for (let i = 0; i < mags.length; i++) {
+        div.innerHTML += '<i style="background:' + legendColor(mags[i] + 1) + '"><\i> ' + mags[i] + (mags[i + 1] ? '&ndash;' + mags[i + 1] + '<br>' : '+');
+    };
 
+    return div;
+};
+
+legend.addTo(myMap);
